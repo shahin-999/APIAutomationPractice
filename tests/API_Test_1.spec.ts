@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test'
-import { buffer } from 'stream/consumers';
+import { test, expect, request } from '@playwright/test'
 
 const bURL = 'https://reqres.in/api'
 
@@ -41,10 +40,36 @@ test('the testing world api', async ({ request }) => {
         }
     });
     const responseJSON = await b.json();
-    console.log(responseJSON);
+    //console.log(responseJSON);
     const postID = await responseJSON.id;
 
     const postResponse = await request.get(`https://thetestingworldapi.com/api/studentsDetails/${postID}`);
 
     console.log(await postResponse.json());
+})
+
+test('The testing worls API - New way', async ({ }) => {
+    // import the request from the @playwright/test to use the newContext 
+    const apiContext = await request.newContext({
+        baseURL: 'https://thetestingworldapi.com'
+    });
+
+    const response = await apiContext.post('/api/studentsDetails', {
+        data: {
+            "first_name": "sample string 2",
+            "middle_name": "sample string 3",
+            "last_name": "sample string 4",
+            "date_of_birth": "sample string 5"
+        }
+    });
+
+    const responseJSON1 = await response.json();
+    //console.log(responseJSON1);
+    const apiID = responseJSON1.id;
+
+    const response0 = await apiContext.get(`/api/studentsDetails/${apiID}`);
+    const response0JSON = await response0.json();
+    expect(response0JSON.status).toBe('true');
+    //console.log(await response0.json());
+
 })
